@@ -96,7 +96,11 @@ function Nibbler.toggle_base()
     end
   end
 end
+api.nvim_create_user_command("NibblerToHex", Nibbler.convert_to_hex)
+api.nvim_create_user_command("NibblerToBin", Nibbler.convert_to_dec)
+api.nvim_create_user_command("NibblerToDec", Nibbler.convert_to_bin())
+api.nvim_create_user_command("NibblerToggle",Nibbler.toggle_base())
 
 
-return Nibbler
+-- return Nibbler
 
