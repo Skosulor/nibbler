@@ -45,5 +45,24 @@ function Nibbler.convert_to_binary()
     end
   end
 end
+
+function Nibbler.convert_to_decimal()
+  local word = get_word_under_cursor()
+  if word then
+    local number
+    if string.match(word, '^0b') then
+      number = tonumber(word:sub(3), 2)
+    elseif string.match(word, '^0x') then
+      number = tonumber(word, 16)
+    else
+      number = tonumber(word)
+    end
+
+    if number then
+      replace_word_under_cursor(tostring(number))
+    end
+  end
+end
+
 return Nibbler
 
