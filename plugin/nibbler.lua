@@ -1,6 +1,4 @@
 local api = vim.api
-local Nibbler = {}
-
 
 local function get_word_under_cursor()
   local cword = vim.fn.expand('<cword>')
@@ -16,7 +14,7 @@ local function replace_word_under_cursor(new_word)
 end
 
 
-function Nibbler.convert_to_hex()
+local function convert_to_hex()
   local word = get_word_under_cursor()
   if word then
     local number = tonumber(word)
@@ -40,7 +38,7 @@ local function to_binary(number)
 end
 
 
-function Nibbler.convert_to_binary()
+local function convert_to_binary()
   local word = get_word_under_cursor()
   if word then
     local number = tonumber(word)
@@ -52,7 +50,7 @@ function Nibbler.convert_to_binary()
 end
 
 
-function Nibbler.convert_to_decimal()
+local function convert_to_decimal()
   local word = get_word_under_cursor()
   if word then
     local number
@@ -71,7 +69,7 @@ function Nibbler.convert_to_decimal()
 end
 
 
-function Nibbler.toggle_base()
+local function toggle_base()
   local word = get_word_under_cursor()
   if word then
     local number
@@ -96,10 +94,11 @@ function Nibbler.toggle_base()
     end
   end
 end
-api.nvim_create_user_command("NibblerToHex", Nibbler.convert_to_hex)
-api.nvim_create_user_command("NibblerToBin", Nibbler.convert_to_dec)
-api.nvim_create_user_command("NibblerToDec", Nibbler.convert_to_bin())
-api.nvim_create_user_command("NibblerToggle",Nibbler.toggle_base())
+
+api.nvim_create_user_command("NibblerToHex", convert_to_hex())
+api.nvim_create_user_command("NibblerToBin", convert_to_dec())
+api.nvim_create_user_command("NibblerToDec", convert_to_bin())
+api.nvim_create_user_command("NibblerToggle",toggle_base())
 
 
 -- return Nibbler
