@@ -26,5 +26,24 @@ function Nibbler.convert_to_hex()
   end
 end
 
+local function to_binary(number)
+  local binary = ""
+  while number > 0 do
+    binary = (number % 2) .. binary
+    number = math.floor(number / 2)
+  end
+  return '0b' .. binary
+end
+
+function Nibbler.convert_to_binary()
+  local word = get_word_under_cursor()
+  if word then
+    local number = tonumber(word)
+    if number then
+      local binary_number = to_binary(number)
+      replace_word_under_cursor(binary_number)
+    end
+  end
+end
 return Nibbler
 
