@@ -14,4 +14,17 @@ local function replace_word_under_cursor(new_word)
 end
 
 function Nibbler.convert_to_hex()
+  local word = get_word_under_cursor()
+  if word then
+    local number = tonumber(word)
+    if number then
+      local hex_number = string.format('%#x', number)
+      replace_word_under_cursor(hex_number)
+    else
+    end
+  else
+  end
+end
+
 return Nibbler
+
