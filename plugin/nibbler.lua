@@ -95,11 +95,9 @@ local function toggle_base()
   end
 end
 
-api.nvim_create_user_command("NibblerToHex", convert_to_hex())
-api.nvim_create_user_command("NibblerToBin", convert_to_dec())
-api.nvim_create_user_command("NibblerToDec", convert_to_bin())
-api.nvim_create_user_command("NibblerToggle",toggle_base())
+api.nvim_create_user_command("NibblerToHex", convert_to_hex, { nargs='?' })
+api.nvim_create_user_command("NibblerToBin", convert_to_binary, { nargs='?' })
+api.nvim_create_user_command("NibblerToDec", convert_to_decimal, { nargs='?' })
+api.nvim_create_user_command("NibblerToggle", toggle_base, { nargs='?' })
 
-
--- return Nibbler
 
