@@ -1,6 +1,8 @@
 local api = vim.api
 local ns_id = api.nvim_create_namespace('nibbler')
 
+local display_enabled  = true
+
 local function get_word_under_cursor()
   local cword = vim.fn.expand('<cword>')
   return cword
@@ -102,6 +104,10 @@ local function clear_virtual_text()
 end
 
 function display_decimal_representation()
+  if not display_enabled then
+      return
+  end
+
   local cword = vim.fn.expand('<cword>')
   local number
 
@@ -129,10 +135,17 @@ vim.cmd([[
   augroup END
 ]])
 
+local function toggle_real_time_display()
+  display_enabled = not display_enabled
+  if not display_enabled then
+    clear_virtual_text()
+  end
+end
+
 
 api.nvim_create_user_command("NibblerToHex", convert_to_hex, { nargs='?' })
 api.nvim_create_user_command("NibblerToBin", convert_to_binary, { nargs='?' })
 api.nvim_create_user_command("NibblerToDec", convert_to_decimal, { nargs='?' })
 api.nvim_create_user_command("NibblerToggle", toggle_base, { nargs='?' })
-
+api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, { nargs='?' })
 
