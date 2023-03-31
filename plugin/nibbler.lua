@@ -1,4 +1,5 @@
 local api = vim.api
+local ns_id = api.nvim_create_namespace('nibbler')
 
 local function get_word_under_cursor()
   local cword = vim.fn.expand('<cword>')
@@ -94,6 +95,40 @@ local function toggle_base()
     end
   end
 end
+
+
+local function clear_virtual_text()
+  api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+end
+
+function display_decimal_representation()
+  local cword = vim.fn.expand('<cword>')
+  local number
+
+  if string.match(cword, '^0b') then
+    number = tonumber(cword:sub(3), 2)
+  elseif string.match(cword, '^0x') then
+    number = tonumber(cword, 16)
+  end
+
+  if number then
+    local cursor_pos = api.nvim_win_get_cursor(0)
+    local row, col = cursor_pos[1] - 1, cursor_pos[2]
+    clear_virtual_text()
+    api.nvim_buf_set_virtual_text(0, ns_id, row, { { tostring(number), 'Comment' } }, {})
+  else
+    clear_virtual_text()
+  end
+end
+
+vim.cmd([[
+  augroup NibblerDecimalRepresentation
+    autocmd!
+    autocmd CursorMoved * lua display_decimal_representation()
+    autocmd CursorMovedI * lua display_decimal_representation()
+  augroup END
+]])
+
 
 api.nvim_create_user_command("NibblerToHex", convert_to_hex, { nargs='?' })
 api.nvim_create_user_command("NibblerToBin", convert_to_binary, { nargs='?' })
