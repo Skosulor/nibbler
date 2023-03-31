@@ -1,6 +1,7 @@
 local api = vim.api
 local ns_id = api.nvim_create_namespace('nibbler')
 
+local M = {}
 local display_enabled  = true
 
 local function get_word_under_cursor()
@@ -149,3 +150,10 @@ api.nvim_create_user_command("NibblerToDec", convert_to_decimal, { nargs='?' })
 api.nvim_create_user_command("NibblerToggle", toggle_base, { nargs='?' })
 api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, { nargs='?' })
 
+function M.setup(opts)
+  if opts and opts.display_enabled ~= nil then
+    display_enabled = opts.display_enabled
+  end
+end
+
+return M
