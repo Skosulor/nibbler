@@ -147,7 +147,7 @@ local function convert_number_to_base(number, base)
   if base == 'hex' then
     return string.format('%#x', number)
   elseif base == 'bin' then
-    return '0b' .. to_binary(number)
+    return to_binary(number)
   elseif base == 'dec' then
     return tostring(number)
   end
