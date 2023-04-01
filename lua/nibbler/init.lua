@@ -101,38 +101,55 @@ local function toggle_real_time_display()
     end
 end
 
-local function convert_selected_base(target_base)
-    local first_line, last_line = vim.fn.getpos("'<")[2], vim.fn.getpos("'>")[2]
-    for line_number = first_line, last_line do
-        local current_line = api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
-        local words = vim.fn.split(current_line, '\\s\\+')
-        for i, word in ipairs(words) do
-            local number
-            if string.match(word, '^0b') then
-                number = tonumber(word:sub(3), 2)
-            elseif string.match(word, '^0x') then
-                number = tonumber(word, 16)
-            else
-                number = tonumber(word)
+
+local function convert_selected_base(target_base, toggle)
+    vim.cmd('normal! v:leave')
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+    local first_line, last_line = start_pos[2], end_pos[2]
+
+    if first_line == last_line and start_pos[3] == end_pos[3] then
+        toggle_base()
+    else
+        for line_number = first_line, last_line do
+            local current_line = api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
+            local words = vim.fn.split(current_line, '\\s\\+')
+
+            for i, word in ipairs(words) do
+                local number
+                if string.match(word, '^0b') then
+                    number = tonumber(word:sub(3), 2)
+                elseif string.match(word, '^0x') then
+                    number = tonumber(word, 16)
+                else
+                    number = tonumber(word)
+                end
+
+                if number then
+                    if toggle then
+                        if string.match(word, '^0b') then
+                            words[i] = tostring(number)
+                        elseif string.match(word, '^0x') then
+                            words[i] = to_binary(number)
+                        else
+                            words[i] = string.format('%#x', number)
+                        end
+                    else
+                        words[i] = convert_number_to_base(number, target_base)
+                    end
+                end
             end
 
-            if number then
-                words[i] = convert_number_to_base(number, target_base)
-            end
+            local new_line = table.concat(words, ' ')
+            api.nvim_buf_set_lines(0, line_number - 1, line_number, false, {new_line})
         end
-
-        local new_line = table.concat(words, ' ')
-        api.nvim_buf_set_lines(0, line_number - 1, line_number, false, {new_line})
     end
 end
 
-api.nvim_create_user_command("NibblerConvertSelectedToHex", function() convert_selected_base('hex') end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerConvertSelectedToBin", function() convert_selected_base('bin') end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerConvertSelectedToDec", function() convert_selected_base('dec') end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToHex", function() toggle_base('hex') end, { nargs='?' })
-api.nvim_create_user_command("NibblerToBin", function() toggle_base('bin') end, { nargs='?' })
-api.nvim_create_user_command("NibblerToDec", function() toggle_base('dec') end, { nargs='?' })
-api.nvim_create_user_command("NibblerToggle", toggle_base, { nargs='?' })
+api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, { nargs='?', range=true })
+api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, { nargs='?', range=true })
+api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, { nargs='?', range=true })
+api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, { nargs='?', range=true })
 api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, { nargs='?' })
 
 function M.setup(opts)
