@@ -108,8 +108,30 @@ local function convert_selected_base(target_base, toggle)
     local end_pos = vim.fn.getpos("'>")
     local first_line, last_line = start_pos[2], end_pos[2]
 
-    if first_line == last_line and start_pos[3] == end_pos[3] then
-        toggle_base()
+    local cursor_pos = vim.fn.getcurpos()
+    local cursor_line, cursor_col = cursor_pos[2], cursor_pos[3]
+
+    -- Check if there is no selection
+    if first_line == last_line and start_pos[3] == end_pos[3] and first_line == cursor_line and start_pos[3] == cursor_col then
+        local word = get_word_under_cursor()
+        if word then
+            local number
+            if string.match(word, '^0b') then
+                number = tonumber(word:sub(3), 2)
+            elseif string.match(word, '^0x') then
+                number = tonumber(word, 16)
+            else
+                number = tonumber(word)
+            end
+
+            if number then
+                if toggle then
+                    toggle_base()
+                else
+                    replace_word_under_cursor(convert_number_to_base(number, target_base))
+                end
+            end
+        end
     else
         for line_number = first_line, last_line do
             local current_line = api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
