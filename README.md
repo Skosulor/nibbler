@@ -4,6 +4,8 @@ Nibbler is a NeoVim plugin that allows you to convert numbers between binary, de
 and hexadecimal formats quickly and easily. It also provides a convenient command to 
 toggle between the different number formats.
 
+![](preview_nibbler.gif)
+
 This plugin was developed with multiple objectives: to explore the potential of AI-assisted code development, gain hands-on experience in creating neovim plugins and their practical applications, learn the basics of the Lua programming language, and cater to the specific needs of embedded programming. 
 
 ## Features
