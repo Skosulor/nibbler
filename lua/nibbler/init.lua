@@ -79,7 +79,7 @@ function display_decimal_representation()
     local cword = vim.fn.expand('<cword>')
     local number, base = parse_number(cword)
 
-    if number then
+    if number and not string.match(base, 'dec') then
         local cursor_pos = api.nvim_win_get_cursor(0)
         local row, _ = cursor_pos[1] - 1, cursor_pos[2]
         clear_virtual_text()
