@@ -4,6 +4,23 @@ local ns_id = api.nvim_create_namespace('nibbler')
 local M = {}
 local display_enabled = true
 
+local function parse_number(word)
+    local number, base
+
+    if string.match(word, '^0b') then
+        number = tonumber(word:sub(3), 2)
+        base = 'bin'
+    elseif string.match(word, '^0x') then
+        number = tonumber(word, 16)
+        base = 'hex'
+    else
+        number = tonumber(word)
+        base = 'dec'
+    end
+
+    return number, base
+end
+
 local function get_word_under_cursor()
     return vim.fn.expand('<cword>')
 end
@@ -37,15 +54,7 @@ end
 local function toggle_base()
     local word = get_word_under_cursor()
     if word then
-        local number
-        if string.match(word, '^0b') then
-            number = tonumber(word:sub(3), 2)
-        elseif string.match(word, '^0x') then
-            number = tonumber(word, 16)
-        else
-            number = tonumber(word)
-        end
-
+        local number, base = parse_number(word)
         if number then
             if string.match(word, '^0b') then
                 replace_word_under_cursor(tostring(number))
@@ -68,13 +77,7 @@ function display_decimal_representation()
     end
 
     local cword = vim.fn.expand('<cword>')
-    local number
-
-    if string.match(cword, '^0b') then
-        number = tonumber(cword:sub(3), 2)
-    elseif string.match(cword, '^0x') then
-        number = tonumber(cword, 16)
-    end
+    local number, base = parse_number(cword)
 
     if number then
         local cursor_pos = api.nvim_win_get_cursor(0)
@@ -115,15 +118,7 @@ local function convert_selected_base(target_base, toggle)
     if first_line == last_line and start_pos[3] == end_pos[3] and first_line == cursor_line and start_pos[3] == cursor_col then
         local word = get_word_under_cursor()
         if word then
-            local number
-            if string.match(word, '^0b') then
-                number = tonumber(word:sub(3), 2)
-            elseif string.match(word, '^0x') then
-                number = tonumber(word, 16)
-            else
-                number = tonumber(word)
-            end
-
+            local number, base = parse_number(word)
             if number then
                 if toggle then
                     toggle_base()
@@ -138,15 +133,7 @@ local function convert_selected_base(target_base, toggle)
             local words = vim.fn.split(current_line, '\\s\\+')
 
             for i, word in ipairs(words) do
-                local number
-                if string.match(word, '^0b') then
-                    number = tonumber(word:sub(3), 2)
-                elseif string.match(word, '^0x') then
-                    number = tonumber(word, 16)
-                else
-                    number = tonumber(word)
-                end
-
+                local number, base = parse_number(word)
                 if number then
                     if toggle then
                         if string.match(word, '^0b') then
