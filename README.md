@@ -16,22 +16,14 @@ This plugin was developed with multiple objectives: to explore the potential of 
 - Toggle between binary, decimal, and hexadecimal representations
 - Diplay the decimal representation of a hexadecimal or binary number as virtual text.
 
-## Installation
+## Installation & Configuration
 
 ### lazy.nvim
 
-Add the following to your `plugins.lua` configuration:
-
-```lua
-{ 'skosulor/nibbler' },
-```
-
-### Configuration
-
-You can configure the plugin using the following options. 
-
+You can install and configure the plugin using the following options in your `plugins.lua` file. 
 ```lua
 {
+    { 'skosulor/nibbler' },
     config = function()
         require('nibbler').setup ({
             display_enabled = true, -- Set to false to disable real-time display (default: true)
