@@ -150,16 +150,35 @@ local function convert_selected_base(target_base, toggle)
             end
 
             local new_line = table.concat(words, ' ')
-            api.nvim_buf_set_lines(0, line_number - 1, line_number, false, {new_line})
+            api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { new_line })
         end
     end
 end
 
-api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, { nargs='?' })
+api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, {
+    nargs = '?',
+    range = true,
+    desc = "Toggles between binary, decimal, and hexadecimal representations",
+})
+api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, {
+    nargs = '?',
+    range = true,
+    desc = "Converts a number to its hexadecimal representation"
+})
+api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, {
+    nargs = '?',
+    range = true,
+    desc = "Converts a number to its binary representation"
+})
+api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, {
+    nargs = '?',
+    range = true,
+    desc = "Converts a number to its decimal representation"
+})
+api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, {
+    nargs = '?',
+    desc = "Toggle virtual text showing decimal value of hex or bin number"
+})
 
 function M.setup(opts)
     if opts and opts.display_enabled ~= nil then
@@ -168,4 +187,3 @@ function M.setup(opts)
 end
 
 return M
-
