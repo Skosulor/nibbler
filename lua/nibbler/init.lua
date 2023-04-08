@@ -89,11 +89,6 @@ local function display_decimal_representation()
     end
 end
 
-api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-    group = api.nvim_create_augroup("NibblerDecimalRepresentation", { clear = true }),
-    callback = display_decimal_representation
-})
-
 local function toggle_real_time_display()
     display_enabled = not display_enabled
     if not display_enabled then
@@ -152,35 +147,39 @@ local function convert_selected_base(target_base, toggle)
     end
 end
 
-api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, {
-    nargs = '?',
-    range = true,
-    desc = "Toggles between binary, decimal, and hexadecimal representations",
-})
-api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, {
-    nargs = '?',
-    range = true,
-    desc = "Converts a number to its hexadecimal representation"
-})
-api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, {
-    nargs = '?',
-    range = true,
-    desc = "Converts a number to its binary representation"
-})
-api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, {
-    nargs = '?',
-    range = true,
-    desc = "Converts a number to its decimal representation"
-})
-api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, {
-    nargs = '?',
-    desc = "Toggle virtual text showing decimal value of hex or bin number"
-})
-
 function M.setup(opts)
     if opts and opts.display_enabled ~= nil then
         display_enabled = opts.display_enabled
     end
+
+    api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, {
+        nargs = '?',
+        range = true,
+        desc = "Toggles between binary, decimal, and hexadecimal representations",
+    })
+    api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, {
+        nargs = '?',
+        range = true,
+        desc = "Converts a number to its hexadecimal representation"
+    })
+    api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, {
+        nargs = '?',
+        range = true,
+        desc = "Converts a number to its binary representation"
+    })
+    api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, {
+        nargs = '?',
+        range = true,
+        desc = "Converts a number to its decimal representation"
+    })
+    api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, {
+        nargs = '?',
+        desc = "Toggle virtual text showing decimal value of hex or bin number"
+    })
+    api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+        group = api.nvim_create_augroup("NibblerDecimalRepresentation", { clear = true }),
+        callback = display_decimal_representation
+    })
 end
 
 return M
