@@ -54,7 +54,7 @@ end
 local function toggle_base()
     local word = get_word_under_cursor()
     if word then
-        local number, base = parse_number(word)
+        local number, _ = parse_number(word)
         if number then
             if string.match(word, '^0b') then
                 replace_word_under_cursor(tostring(number))
@@ -110,7 +110,7 @@ local function convert_selected_base(target_base, toggle)
     if first_line == last_line and start_pos[3] == end_pos[3] and first_line == cursor_line and start_pos[3] == cursor_col then
         local word = get_word_under_cursor()
         if word then
-            local number, base = parse_number(word)
+            local number, _ = parse_number(word)
             if number then
                 if toggle then
                     toggle_base()
@@ -125,7 +125,7 @@ local function convert_selected_base(target_base, toggle)
             local words = vim.fn.split(current_line, '\\s\\+')
 
             for i, word in ipairs(words) do
-                local number, base = parse_number(word)
+                local number, _ = parse_number(word)
                 if number then
                     if toggle then
                         if string.match(word, '^0b') then
