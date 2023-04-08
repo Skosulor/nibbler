@@ -147,6 +147,21 @@ local function convert_selected_base(target_base, toggle)
     end
 end
 
+local function hexstring_to_c_arrray(args)
+    local edits = require("nibbler.edits")
+    local text = nil
+    local range = nil
+    if args.range == 0 then
+        text = edits.get_word_under_cursor()
+        range = edits.get_word_under_cursor_range()
+    elseif args.range == 2 then
+        text = edits.get_selected_text()
+        range = edits.get_selected_range()
+    end
+    edits.replace_range_with(range, text:gsub("%x%x", "0x%1, "):sub(1, -3))
+end
+
+
 function M.setup(opts)
     if opts and opts.display_enabled ~= nil then
         display_enabled = opts.display_enabled
@@ -175,6 +190,10 @@ function M.setup(opts)
     api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, {
         nargs = '?',
         desc = "Toggle virtual text showing decimal value of hex or bin number"
+    })
+    api.nvim_create_user_command("NibblerHexStringToCArray", hexstring_to_c_arrray, {
+        range = true,
+        desc = "Converts a hexadecimal string to a C-style array",
     })
     api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
         group = api.nvim_create_augroup("NibblerDecimalRepresentation", { clear = true }),
