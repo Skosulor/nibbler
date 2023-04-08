@@ -71,7 +71,7 @@ local function clear_virtual_text()
     api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
 end
 
-function display_decimal_representation()
+local function display_decimal_representation()
     if not display_enabled then
         return
     end
@@ -89,13 +89,10 @@ function display_decimal_representation()
     end
 end
 
-vim.cmd([[
-augroup NibblerDecimalRepresentation
-autocmd!
-autocmd CursorMoved * lua display_decimal_representation()
-autocmd CursorMovedI * lua display_decimal_representation()
-augroup END
-]])
+api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    group = api.nvim_create_augroup("NibblerDecimalRepresentation", { clear = true }),
+    callback = display_decimal_representation
+})
 
 local function toggle_real_time_display()
     display_enabled = not display_enabled
