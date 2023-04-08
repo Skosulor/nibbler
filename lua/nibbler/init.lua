@@ -1,5 +1,6 @@
 local api = vim.api
 local ns_id = api.nvim_create_namespace('nibbler')
+local edits = require("nibbler.edits")
 
 local M = {}
 local display_enabled = true
@@ -19,17 +20,6 @@ local function parse_number(word)
     end
 
     return number, base
-end
-
-local function get_word_under_cursor()
-    return vim.fn.expand('<cword>')
-end
-
-local function replace_word_under_cursor(new_word)
-    local current_line = api.nvim_get_current_line()
-    local old_word = vim.fn.expand('<cword>')
-    local replaced_line = vim.fn.substitute(current_line, old_word, new_word, '')
-    api.nvim_set_current_line(replaced_line)
 end
 
 local function to_binary(number)
@@ -52,16 +42,16 @@ local function convert_number_to_base(number, base)
 end
 
 local function toggle_base()
-    local word = get_word_under_cursor()
+    local word = edits.get_word_under_cursor()
     if word then
         local number, _ = parse_number(word)
         if number then
             if string.match(word, '^0b') then
-                replace_word_under_cursor(tostring(number))
+                edits.replace_word_under_cursor_with(tostring(number))
             elseif string.match(word, '^0x') then
-                replace_word_under_cursor(to_binary(number))
+                edits.replace_word_under_cursor_with(to_binary(number))
             else
-                replace_word_under_cursor(string.format('%#x', number))
+                edits.replace_word_under_cursor_with(string.format('%#x', number))
             end
         end
     end
@@ -108,14 +98,14 @@ local function convert_selected_base(target_base, toggle)
 
     -- Check if there is no selection
     if first_line == last_line and start_pos[3] == end_pos[3] and first_line == cursor_line and start_pos[3] == cursor_col then
-        local word = get_word_under_cursor()
+        local word = edits.get_word_under_cursor()
         if word then
             local number, _ = parse_number(word)
             if number then
                 if toggle then
                     toggle_base()
                 else
-                    replace_word_under_cursor(convert_number_to_base(number, target_base))
+                    edits.replace_word_under_cursor_with(convert_number_to_base(number, target_base))
                 end
             end
         end
@@ -148,7 +138,6 @@ local function convert_selected_base(target_base, toggle)
 end
 
 local function hexstring_to_c_arrray(args)
-    local edits = require("nibbler.edits")
     local text = nil
     local range = nil
     if args.range == 0 then
@@ -160,7 +149,6 @@ local function hexstring_to_c_arrray(args)
     end
     edits.replace_range_with(range, text:gsub("%x%x", "0x%1, "):sub(1, -3))
 end
-
 
 function M.setup(opts)
     if opts and opts.display_enabled ~= nil then
