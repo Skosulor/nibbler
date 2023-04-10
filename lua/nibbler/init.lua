@@ -137,9 +137,27 @@ local function convert_selected_base(target_base, toggle)
     end
 end
 
+local function is_hexstring(text)
+    local stripped = text:gsub("%s+", "")
+
+    local non_hex_digits = stripped:gsub("%x+", "")
+    if #non_hex_digits ~= 0 then
+        print("ERROR: text contains non hexadecimal digits '" .. non_hex_digits .. "'")
+        return false
+    end
+
+    if #stripped % 2 ~= 0 then
+        print("ERROR: text does not contain an even number of digits (" .. #stripped .. " digits found)")
+        return false
+    end
+
+    return true
+end
+
 local function hexstring_to_c_arrray(args)
     local text = nil
     local range = nil
+
     if args.range == 0 then
         text = edits.get_word_under_cursor()
         range = edits.get_word_under_cursor_range()
@@ -147,6 +165,11 @@ local function hexstring_to_c_arrray(args)
         text = edits.get_selected_text()
         range = edits.get_selected_range()
     end
+
+    if not is_hexstring(text) then
+        return
+    end
+
     edits.replace_range_with(range, text:gsub("%x%x", "0x%1, "):sub(1, -3))
 end
 
