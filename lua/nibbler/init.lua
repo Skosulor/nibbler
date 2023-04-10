@@ -154,23 +154,40 @@ local function is_hexstring(text)
     return true
 end
 
-local function hexstring_to_c_arrray(args)
-    local text = nil
-    local range = nil
-
+local function get_input_text_for_command(args)
     if args.range == 0 then
-        text = edits.get_word_under_cursor()
-        range = edits.get_word_under_cursor_range()
-    elseif args.range == 2 then
-        text = edits.get_selected_text()
-        range = edits.get_selected_range()
+        local text = edits.get_word_under_cursor()
+        local range = edits.get_word_under_cursor_range()
+        return text, range
+    else
+        local text = edits.get_selected_text()
+        local range = edits.get_selected_range()
+        return text, range
     end
+end
 
+local function hexstring_to_c_arrray(args)
+    local text, range = get_input_text_for_command(args)
     if not is_hexstring(text) then
         return
     end
+    local array = text:gsub("%x%x", "0x%1, "):sub(1, -3)
+    edits.replace_range_with(range, array)
+end
 
-    edits.replace_range_with(range, text:gsub("%x%x", "0x%1, "):sub(1, -3))
+local function number_to_c_array(args)
+    local text, range = get_input_text_for_command(args)
+    local number = parse_number(text)
+    if number == nil then
+        print("ERROR: text cannot be converted to a number")
+        return
+    end
+    local hex = convert_number_to_base(number, "hex"):sub(3)
+    if #hex % 2 ~= 0 then
+        hex = "0" .. hex
+    end
+    local array = hex:gsub("%x%x", "0x%1, "):sub(1, -3)
+    edits.replace_range_with(range, array)
 end
 
 function M.setup(opts)
@@ -204,7 +221,11 @@ function M.setup(opts)
     })
     api.nvim_create_user_command("NibblerHexStringToCArray", hexstring_to_c_arrray, {
         range = true,
-        desc = "Converts a hexadecimal string to a C-style array",
+        desc = "Converts a hexadecimal string to a C-style array of bytes",
+    })
+    api.nvim_create_user_command("NibblerToCArray", number_to_c_array, {
+        range = true,
+        desc = "Converts a number to a C-style array of bytes",
     })
     api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
         group = api.nvim_create_augroup("NibblerDecimalRepresentation", { clear = true }),

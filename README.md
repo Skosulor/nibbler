@@ -41,11 +41,12 @@ You can install and configure the plugin using the following options in your `pl
 
 Have the cursor over a number an call one of the following commands:
 
-| Function                 | Description                                                    |
-| ------------------------ | -------------------------------------------------------------- |
-| NibblerToHex             | Convert number under cursor/highlighted to hexadecimal         |
-| NibblerToBin             | Convert number under cursor/highlighted to binary              |
-| NibblerToDec             | Convert number under cursor/highlighted to decimal             |
-| NibblerToggle            | Toggle between binary, decimal, and hexadecimal                |
-| NibblerToggleDisplay     | Toggle virtual text showing decimal value of hex or bin number |
-| NibblerHexStringToCArray | Converts a hexadecimal string to a C-style array               |
+| Function                 | Description                                                         |
+| ------------------------ | ------------------------------------------------------------------- |
+| NibblerToHex             | Convert number under cursor/highlighted to hexadecimal              |
+| NibblerToBin             | Convert number under cursor/highlighted to binary                   |
+| NibblerToDec             | Convert number under cursor/highlighted to decimal                  |
+| NibblerToggle            | Toggle between binary, decimal, and hexadecimal                     |
+| NibblerToggleDisplay     | Toggle virtual text showing decimal value of hex or bin number      |
+| NibblerToCArray          | Convert number under cursor/highlighted to a C-Style array of bytes |
+| NibblerHexStringToCArray | Convert a hexadecimal string to a C-style array of bytes            |
