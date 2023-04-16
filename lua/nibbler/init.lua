@@ -1,5 +1,6 @@
 local api = vim.api
 local ns_id = api.nvim_create_namespace('nibbler')
+local edits = require("nibbler.edits")
 
 local M = {}
 local display_enabled = true
@@ -19,17 +20,6 @@ local function parse_number(word)
     end
 
     return number, base
-end
-
-local function get_word_under_cursor()
-    return vim.fn.expand('<cword>')
-end
-
-local function replace_word_under_cursor(new_word)
-    local current_line = api.nvim_get_current_line()
-    local old_word = vim.fn.expand('<cword>')
-    local replaced_line = vim.fn.substitute(current_line, old_word, new_word, '')
-    api.nvim_set_current_line(replaced_line)
 end
 
 local function to_binary(number)
@@ -52,16 +42,16 @@ local function convert_number_to_base(number, base)
 end
 
 local function toggle_base()
-    local word = get_word_under_cursor()
+    local word = edits.get_word_under_cursor()
     if word then
-        local number, base = parse_number(word)
+        local number, _ = parse_number(word)
         if number then
             if string.match(word, '^0b') then
-                replace_word_under_cursor(tostring(number))
+                edits.replace_word_under_cursor_with(tostring(number))
             elseif string.match(word, '^0x') then
-                replace_word_under_cursor(to_binary(number))
+                edits.replace_word_under_cursor_with(to_binary(number))
             else
-                replace_word_under_cursor(string.format('%#x', number))
+                edits.replace_word_under_cursor_with(string.format('%#x', number))
             end
         end
     end
@@ -71,7 +61,7 @@ local function clear_virtual_text()
     api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
 end
 
-function display_decimal_representation()
+local function display_decimal_representation()
     if not display_enabled then
         return
     end
@@ -88,14 +78,6 @@ function display_decimal_representation()
         clear_virtual_text()
     end
 end
-
-vim.cmd([[
-augroup NibblerDecimalRepresentation
-autocmd!
-autocmd CursorMoved * lua display_decimal_representation()
-autocmd CursorMovedI * lua display_decimal_representation()
-augroup END
-]])
 
 local function toggle_real_time_display()
     display_enabled = not display_enabled
@@ -116,14 +98,14 @@ local function convert_selected_base(target_base, toggle)
 
     -- Check if there is no selection
     if first_line == last_line and start_pos[3] == end_pos[3] and first_line == cursor_line and start_pos[3] == cursor_col then
-        local word = get_word_under_cursor()
+        local word = edits.get_word_under_cursor()
         if word then
-            local number, base = parse_number(word)
+            local number, _ = parse_number(word)
             if number then
                 if toggle then
                     toggle_base()
                 else
-                    replace_word_under_cursor(convert_number_to_base(number, target_base))
+                    edits.replace_word_under_cursor_with(convert_number_to_base(number, target_base))
                 end
             end
         end
@@ -133,7 +115,7 @@ local function convert_selected_base(target_base, toggle)
             local words = vim.fn.split(current_line, '\\s\\+')
 
             for i, word in ipairs(words) do
-                local number, base = parse_number(word)
+                local number, _ = parse_number(word)
                 if number then
                     if toggle then
                         if string.match(word, '^0b') then
@@ -150,22 +132,105 @@ local function convert_selected_base(target_base, toggle)
             end
 
             local new_line = table.concat(words, ' ')
-            api.nvim_buf_set_lines(0, line_number - 1, line_number, false, {new_line})
+            api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { new_line })
         end
     end
 end
 
-api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, { nargs='?', range=true })
-api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, { nargs='?' })
+local function is_hexstring(text)
+    local stripped = text:gsub("%s+", "")
+
+    local non_hex_digits = stripped:gsub("%x+", "")
+    if #non_hex_digits ~= 0 then
+        print("ERROR: text contains non hexadecimal digits '" .. non_hex_digits .. "'")
+        return false
+    end
+
+    if #stripped % 2 ~= 0 then
+        print("ERROR: text does not contain an even number of digits (" .. #stripped .. " digits found)")
+        return false
+    end
+
+    return true
+end
+
+local function get_input_text_for_command(args)
+    if args.range == 0 then
+        local text = edits.get_word_under_cursor()
+        local range = edits.get_word_under_cursor_range()
+        return text, range
+    else
+        local text = edits.get_selected_text()
+        local range = edits.get_selected_range()
+        return text, range
+    end
+end
+
+local function hexstring_to_c_arrray(args)
+    local text, range = get_input_text_for_command(args)
+    if not is_hexstring(text) then
+        return
+    end
+    local array = text:gsub("%x%x", "0x%1, "):sub(1, -3)
+    edits.replace_range_with(range, array)
+end
+
+local function number_to_c_array(args)
+    local text, range = get_input_text_for_command(args)
+    local number = parse_number(text)
+    if number == nil then
+        print("ERROR: text cannot be converted to a number")
+        return
+    end
+    local hex = convert_number_to_base(number, "hex"):sub(3)
+    if #hex % 2 ~= 0 then
+        hex = "0" .. hex
+    end
+    local array = hex:gsub("%x%x", "0x%1, "):sub(1, -3)
+    edits.replace_range_with(range, array)
+end
 
 function M.setup(opts)
     if opts and opts.display_enabled ~= nil then
         display_enabled = opts.display_enabled
     end
+
+    api.nvim_create_user_command("NibblerToggle", function() convert_selected_base(nil, true) end, {
+        nargs = '?',
+        range = true,
+        desc = "Toggles between binary, decimal, and hexadecimal representations",
+    })
+    api.nvim_create_user_command("NibblerToHex", function() convert_selected_base('hex', false) end, {
+        nargs = '?',
+        range = true,
+        desc = "Converts a number to its hexadecimal representation"
+    })
+    api.nvim_create_user_command("NibblerToBin", function() convert_selected_base('bin', false) end, {
+        nargs = '?',
+        range = true,
+        desc = "Converts a number to its binary representation"
+    })
+    api.nvim_create_user_command("NibblerToDec", function() convert_selected_base('dec', false) end, {
+        nargs = '?',
+        range = true,
+        desc = "Converts a number to its decimal representation"
+    })
+    api.nvim_create_user_command("NibblerToggleDisplay", toggle_real_time_display, {
+        nargs = '?',
+        desc = "Toggle virtual text showing decimal value of hex or bin number"
+    })
+    api.nvim_create_user_command("NibblerHexStringToCArray", hexstring_to_c_arrray, {
+        range = true,
+        desc = "Converts a hexadecimal string to a C-style array of bytes",
+    })
+    api.nvim_create_user_command("NibblerToCArray", number_to_c_array, {
+        range = true,
+        desc = "Converts a number to a C-style array of bytes",
+    })
+    api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+        group = api.nvim_create_augroup("NibblerDecimalRepresentation", { clear = true }),
+        callback = display_decimal_representation
+    })
 end
 
 return M
-
