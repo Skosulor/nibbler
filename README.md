@@ -28,7 +28,7 @@ You can install and configure the plugin using the following options in your `pl
 
 ```lua
 {
-    { 'skosulor/nibbler' },
+    'skosulor/nibbler',
     config = function()
         require('nibbler').setup ({
             display_enabled = true, -- Set to false to disable real-time display (default: true)
