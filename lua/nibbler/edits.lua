@@ -65,7 +65,7 @@ function M.replace_range_with(range, to_insert)
             newText = to_insert
         }
     }
-    vim.lsp.util.apply_text_edits(edits, 0, "utf-16")
+    vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), "utf-16")
 end
 
 function M.replace_selection_with(to_insert)
