@@ -5,17 +5,21 @@ local edits = require("nibbler.edits")
 local M = {}
 local display_enabled = true
 
+local function clean_number(word)
+  return word:gsub("[uUlLi][%w%d]*$", ""):gsub("_", "")
+end
+
 local function parse_number(word)
     local number, base
 
     if string.match(word, '^0b') then
-        number = tonumber(word:sub(3), 2)
+        number = tonumber(clean_number(word):sub(3), 2)
         base = 'bin'
     elseif string.match(word, '^0x') then
-        number = tonumber(word, 16)
+        number = tonumber(clean_number(word), 16)
         base = 'hex'
     else
-        number = tonumber(word)
+        number = tonumber(clean_number(word), 10)
         base = 'dec'
     end
 
